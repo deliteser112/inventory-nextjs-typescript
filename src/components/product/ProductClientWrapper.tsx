@@ -6,15 +6,21 @@ import ProductList from "./ProductList";
 import ProductListToolbar from "./ProductListToolbar";
 import ProductForm from "./ProductForm";
 import ProductDetailsSidebar from "./ProductDetailsSidebar";
-import InventoryManagement from "../inventory/InventoryManagement";
-import { useProductContext } from "../../contexts/ProductContext"; // Use context hook
-import productService from '../../services/productService';
+import { useDispatch, useSelector } from "react-redux"; // Import useSelector and useDispatch from react-redux
+import { RootState, AppDispatch } from "../../store"; // Import RootState and AppDispatch types
+import {
+  fetchProducts,
+  addProductAsync,
+  updateProductAsync,
+  deleteProductAsync,
+} from "../../store/slices/productSlice"; // Import async thunks
 
-import { Product, InventoryChange } from "../../types/product";;
+import { Product } from "../../types/product";
 
 const ProductClientWrapper: React.FC = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const { products } = useSelector((state: RootState) => state.product); // Use useSelector to access products from Redux store
 
-  const { state, dispatch } = useProductContext(); // Access state and dispatch from context
   const [openForm, setOpenForm] = useState<boolean>(false);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | undefined>(
@@ -22,11 +28,13 @@ const ProductClientWrapper: React.FC = () => {
   );
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
 
-  console.log('state', state);
+  useEffect(() => {
+    dispatch(fetchProducts()); // Fetch products on component mount
+  }, [dispatch]);
 
   useEffect(() => {
-    setFilteredProducts([...state.products]);
-  }, [state])
+    setFilteredProducts(products); // Update filtered products whenever products change
+  }, [products]);
 
   const handleAddProduct = () => {
     setSelectedProduct(undefined);
@@ -40,36 +48,24 @@ const ProductClientWrapper: React.FC = () => {
 
   const handleSaveProduct = (product: Product) => {
     if (product.id) {
-      dispatch({ type: "UPDATE_PRODUCT", product });
+      dispatch(updateProductAsync(product)); // Dispatch async thunk for updating product
     } else {
       const newProduct = { ...product, id: Date.now().toString() };
-      dispatch({ type: "ADD_PRODUCT", product: newProduct });
+      dispatch(addProductAsync(newProduct)); // Dispatch async thunk for adding new product
     }
     setOpenForm(false);
   };
 
   const handleDeleteProduct = (id: string) => {
-    dispatch({ type: "DELETE_PRODUCT", id });
+    dispatch(deleteProductAsync(id)); // Dispatch async thunk for deleting product
     setSidebarOpen(false);
   };
 
   const handleSearch = (searchTerm: string) => {
-    const filtered = state.products.filter((product) =>
+    const filtered = products.filter((product) =>
       product.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredProducts(filtered);
-  };
-
-  const handleAdjustInventory = (productId: string, newStock: number) => {
-    const change: InventoryChange = {
-      date: new Date().toISOString(),
-      changeType: "adjustment",
-      quantityChanged:
-        newStock - (state.products.find((p) => p.id === productId)?.stock ?? 0),
-      newQuantity: newStock,
-      changedBy: "Admin",
-    };
-    dispatch({ type: "LOG_INVENTORY_CHANGE", productId, change });
   };
 
   const handleProductClick = (product: Product) => {
@@ -93,10 +89,6 @@ const ProductClientWrapper: React.FC = () => {
         onDeleteProduct={handleDeleteProduct}
         onProductClick={handleProductClick}
       />
-      {/* <InventoryManagement
-        products={state.products}
-        onAdjustInventory={handleAdjustInventory}
-      /> */}
       {openForm && (
         <ProductForm
           product={selectedProduct}

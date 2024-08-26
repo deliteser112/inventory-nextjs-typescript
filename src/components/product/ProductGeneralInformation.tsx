@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { Box, Typography, Button, Divider, Grid } from "@mui/material";
 import { Product, InventoryChange } from "../../types/product";
-import StockAdjustmentSidebar from "../inventory/StockAdjustmentSidebar"; // Import the StockAdjustmentSidebar
-import { useProductContext } from "../../contexts/ProductContext"; // Import the context hook
+import StockAdjustmentSidebar from "../inventory/StockAdjustmentSidebar";
+import { useAppDispatch } from "../../store"; // Import the typed useDispatch
+import { logInventoryChangeAsync } from "../../store/slices/productSlice"; // Import the async thunk action
 
 interface ProductGeneralInformationProps {
   product: Product;
@@ -11,9 +12,8 @@ interface ProductGeneralInformationProps {
 const ProductGeneralInformation: React.FC<ProductGeneralInformationProps> = ({
   product,
 }) => {
-  // State for controlling the visibility of the StockAdjustmentSidebar
   const [adjustmentSidebarOpen, setAdjustmentSidebarOpen] = useState(false);
-  const { dispatch } = useProductContext(); // Use context for dispatching actions
+  const dispatch = useAppDispatch(); // Use the typed dispatch
 
   // Function to open the StockAdjustmentSidebar
   const handleAdjustmentOpen = () => {
@@ -27,10 +27,10 @@ const ProductGeneralInformation: React.FC<ProductGeneralInformationProps> = ({
 
   // Function to handle saving an inventory adjustment
   const handleSaveAdjustment = (productId: string, change: InventoryChange) => {
-    // Dispatch an action to log the inventory change
-    dispatch({ type: "LOG_INVENTORY_CHANGE", productId, change });
+    // Dispatch a Redux action to log the inventory change
+    dispatch(logInventoryChangeAsync({ productId, change }));
 
-    setAdjustmentSidebarOpen(false); // Close the sidebar after saving
+    setAdjustmentSidebarOpen(false);
   };
 
   return (
@@ -83,10 +83,7 @@ const ProductGeneralInformation: React.FC<ProductGeneralInformationProps> = ({
                 variant="body2"
                 sx={{ marginBottom: "8px" }}
               >
-                {change.location}: {change.newQuantity}{" "}
-                {change.newQuantity < 50 && (
-                  <span style={{ color: "red" }}>low</span>
-                )}
+                {change.location}: {change.newQuantity}
               </Typography>
             ))}
           </Box>

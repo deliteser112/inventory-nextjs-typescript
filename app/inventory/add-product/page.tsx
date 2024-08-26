@@ -15,8 +15,12 @@ import {
 import { styled } from "@mui/material/styles";
 import { useFormik } from "formik";
 import * as yup from "yup";
+
+import { useDispatch } from "react-redux";
+import { addProductAsync } from "../../../src/store/slices/productSlice";
+import { AppDispatch } from "../../../src/store";
+
 import { Product } from "../../../src/types/product";
-import { useProductContext } from "../../../src/contexts/ProductContext";
 import ImageUploader from "../../../src/components/product/ImageUploader";
 
 // Styled components
@@ -93,7 +97,7 @@ const validationSchema = yup.object({
 });
 
 const AddProductPage: React.FC = () => {
-  const { dispatch } = useProductContext();
+  const dispatch = useDispatch<AppDispatch>();
 
   const formik = useFormik({
     initialValues: {
@@ -118,10 +122,11 @@ const AddProductPage: React.FC = () => {
         price: 0
       };
 
-      dispatch({
-        type: "ADD_PRODUCT",
-        product,
-      });
+      // dispatch({
+      //   type: "ADD_PRODUCT",
+      //   product,
+      // });
+      dispatch(addProductAsync(product));
       formik.resetForm();
     },
   });

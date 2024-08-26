@@ -13,9 +13,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import ProductHistory from "./ProductHistory";
 import ProductGeneralInformation from "./ProductGeneralInformation";
-import StockAdjustmentSidebar from "../inventory/StockAdjustmentSidebar";
 import { Product, InventoryChange } from "../../types/product";
-import { useProductContext } from "../../contexts/ProductContext";
 
 interface ProductDetailsSidebarProps {
   product: Product;
@@ -103,11 +101,13 @@ const ProductTabs: React.FC<{
       value="general"
       label="General Information"
       sx={{ color: selectedTab === "general" ? "#39DB7D" : "#FFFFFF" }}
+      disableRipple
     />
     <Tab
       value="history"
       label="History"
       sx={{ color: selectedTab === "history" ? "#39DB7D" : "#FFFFFF" }}
+      disableRipple
     />
   </Tabs>
 );

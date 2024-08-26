@@ -53,7 +53,7 @@ const StockAdjustmentSidebar: React.FC<StockAdjustmentSidebarProps> = ({
         adjustmentType === "quantity" ? "adjustment" : "value adjustment",
       quantityChanged: newQuantity - quantityAvailable,
       newQuantity: newQuantity,
-      changedBy: "Admin", // Replace with dynamic user data if available
+      changedBy: "Admin",
       location,
       description
     };
@@ -122,7 +122,6 @@ const StockAdjustmentSidebar: React.FC<StockAdjustmentSidebarProps> = ({
         <MenuItem value="Warehouse • BDG">Warehouse • BDG</MenuItem>
         <MenuItem value="Warehouse • JKT">Warehouse • JKT</MenuItem>
         <MenuItem value="Warehouse • MLG">Warehouse • MLG</MenuItem>
-        {/* Add more locations as needed */}
       </TextField>
 
       <TextField

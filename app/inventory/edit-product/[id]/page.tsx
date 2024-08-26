@@ -17,11 +17,13 @@ import {
 import { styled } from "@mui/material/styles";
 import { useFormik } from "formik";
 import * as yup from "yup";
+import { useDispatch, useSelector } from "react-redux";
 import { useRouter, useParams } from "next/navigation";
 import { Product } from "../../../../src/types/product";
-import { useProductContext } from "../../../../src/contexts/ProductContext";
 import ImageUploader from "../../../../src/components/product/ImageUploader";
-import productService from "../../../../src/services/productService";
+
+import { updateProductAsync } from "../../../../src/store/slices/productSlice";
+import { RootState, AppDispatch } from "../../../../src/store";
 
 // Styled components (same as add page)
 const PageContainer = styled(Box)(({ theme }) => ({
@@ -97,23 +99,14 @@ const validationSchema = yup.object({
 });
 
 const EditProductPage: React.FC = () => {
-  const { dispatch } = useProductContext();
+  const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const { id } = useParams();
-  const [product, setProduct] = useState<Product | null>(null);
+  // const [product, setProduct] = useState<Product | null>(null);
 
-  useEffect(() => {
-    if (id) {
-      productService.getProductById(id).then((fetchedProduct) => {
-        console.log('fetchedProduct', fetchedProduct);
-        if (fetchedProduct) {
-          setProduct(fetchedProduct);
-        } else {
-          router.push("/inventory");
-        }
-      });
-    }
-  }, [id]);
+  const product = useSelector((state: RootState) =>
+    state.product.products.find((p) => p.id === id)
+  );
 
   const formik = useFormik({
     initialValues: {
@@ -132,14 +125,14 @@ const EditProductPage: React.FC = () => {
     enableReinitialize: true,
     onSubmit: (values) => {
       const updatedProduct: Product = {
-        ...product,
+        id: product?.id,
+        status: product?.status,
+        inventoryChanges: product?.inventoryChanges,
         ...values,
       };
 
-      dispatch({
-        type: "UPDATE_PRODUCT",
-        product: updatedProduct,
-      });
+      console.log('updatedProduct', updatedProduct);
+      dispatch(updateProductAsync(updatedProduct));
 
       router.push("/inventory");
     },
@@ -302,9 +295,9 @@ const EditProductPage: React.FC = () => {
               label="Location"
               error={formik.touched.location && Boolean(formik.errors.location)}
             >
-              <MenuItem value="Wharehouse * BDG">Wharehouse * BDG</MenuItem>
-              <MenuItem value="Wharehouse * JKT">Wharehouse * JKT</MenuItem>
-              <MenuItem value="Wharehouse * MLG">Wharehouse * MLG</MenuItem>
+              <MenuItem value="Warehouse • BDG">Warehouse • BDG</MenuItem>
+              <MenuItem value="Warehouse • JKT">Warehouse • JKT</MenuItem>
+              <MenuItem value="Warehouse • MLG">Warehouse • MLG</MenuItem>
             </StyledSelect>
             {formik.touched.location && formik.errors.location && (
               <Typography color="error">{formik.errors.location}</Typography>

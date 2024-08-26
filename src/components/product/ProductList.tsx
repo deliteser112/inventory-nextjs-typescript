@@ -18,7 +18,6 @@ const ProductList: React.FC<ProductListProps> = ({
   onDeleteProduct,
   onProductClick,
 }) => {
-  console.log('products', products);
   return (
     <Box sx={{ width: "100%", padding: "16px" }}>
       {products.map((product) => (
