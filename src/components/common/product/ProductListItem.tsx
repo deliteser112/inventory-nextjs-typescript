@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTheme } from "@mui/material/styles";
 import {
   Card,
   CardContent,
@@ -11,33 +12,32 @@ import {
   Divider,
 } from "@mui/material";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
-import { Product } from "../../types/product";
-import { useRouter } from "next/navigation"; // Import useRouter
+import { Product } from "../../../types/product";
+import { useRouter } from "next/navigation";
 
-const mockImagePath = "/images/mock-product.png"; // Path to your mock image
+const mockImagePath = "/images/mock-product.png";
 
 interface ProductCardProps {
   product: Product;
-  onEditProduct: (product: Product) => void;
-  onDeleteProduct: (id: string) => void;
+  onDeleteProduct: (id?: string) => void;
   onProductClick: (product: Product) => void;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({
   product,
-  onEditProduct,
   onDeleteProduct,
   onProductClick,
 }) => {
+  const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [imageSrc, setImageSrc] = useState<string>(
     product.image || mockImagePath
   );
 
-  const router = useRouter(); // Initialize router
+  const router = useRouter();
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    event.stopPropagation(); // Prevent click event from triggering onProductClick
+    event.stopPropagation();
     setAnchorEl(event.currentTarget);
   };
 
@@ -46,7 +46,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   };
 
   const handleEditClick = () => {
-    router.push(`/inventory/edit-product/${product.id}`); // Navigate to the edit page
+    router.push(`/inventory/edit-product/${product.id}`);
     handleMenuClose();
   };
 
@@ -63,7 +63,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
   const handleCardClick = () => {
     if (!anchorEl) {
-      // Only trigger detail view if the menu is not open
       onProductClick(product);
     }
   };
@@ -116,9 +115,12 @@ const ProductCard: React.FC<ProductCardProps> = ({
             "&.MuiCardContent-root": {
               paddingBottom: "0px !important",
             },
+            [theme.breakpoints.down("md")]: {
+              display: "block",
+            },
           }}
         >
-          <Box sx={{ width: { xs: 320, sm: 450 } }}>
+          <Box sx={{ width: { xs: '100%', sm: 520 } }}>
             <Typography component="div" variant="h6" sx={{ marginBottom: 1 }}>
               {product.name}
             </Typography>

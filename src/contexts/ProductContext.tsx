@@ -9,131 +9,147 @@ import React, {
   useEffect,
 } from "react";
 import { Product, InventoryChange } from "../types/product";
-// import { getChanges } from "../utils/getChanges";
-import { getChanges } from "../utils/getChange";
-import { mockProducts } from "../data/mockProducts"; // Import mock data
+import { detectChanges } from "../utils/detectChanges";
+import { mockProducts } from "../data/mockProducts";
 
-// Define Actions
-type ProductAction =
+// Define the state and action types
+interface ProductState {
+  products: Product[];
+  status: "idle" | "loading" | "failed";
+  error: string | null;
+}
+
+type Action =
+  | { type: "FETCH_PRODUCTS_START" }
+  | { type: "FETCH_PRODUCTS_SUCCESS"; products: Product[] }
+  | { type: "FETCH_PRODUCTS_FAILURE"; error: string }
   | { type: "ADD_PRODUCT"; product: Product }
-  | { type: "UPDATE_PRODUCT"; product: Product }
-  | { type: "DELETE_PRODUCT"; id: string }
-  | { type: "INITIALIZE_PRODUCTS"; products: Product[] }
+  | { type: "UPDATE_PRODUCT"; updatedProduct: Product }
+  | { type: "DELETE_PRODUCT"; productId?: string }
   | {
       type: "LOG_INVENTORY_CHANGE";
       productId: string;
       change: InventoryChange;
     };
 
-// Define State
-interface ProductState {
-  products: Product[];
-}
-
-// Initialize State
-const initialState: ProductState = {
-  products: [],
+// Helper function to sync products with localStorage
+const syncWithLocalStorage = (products: Product[]) => {
+  if (typeof window !== "undefined") {
+    localStorage.setItem("products", JSON.stringify(products));
+  }
 };
 
-// Reducer Function
-const productReducer = (
-  state: ProductState,
-  action: ProductAction
-): ProductState => {
+// Helper function to load products from localStorage or initialize with mock data
+const loadFromLocalStorage = (): Product[] => {
+  if (typeof window !== "undefined") {
+    const storedProducts = localStorage.getItem("products");
+    if (storedProducts) {
+      return JSON.parse(storedProducts);
+    } else {
+      syncWithLocalStorage(mockProducts);
+      return mockProducts;
+    }
+  }
+  return mockProducts;
+};
+
+// Initial state
+const initialState: ProductState = {
+  products: [],
+  status: "idle",
+  error: null,
+};
+
+const productReducer = (state: ProductState, action: Action): ProductState => {
   switch (action.type) {
-    case "INITIALIZE_PRODUCTS":
-      return { ...state, products: action.products };
+    case "FETCH_PRODUCTS_START":
+      return { ...state, status: "loading", error: null };
+    case "FETCH_PRODUCTS_SUCCESS":
+      return { ...state, status: "idle", products: action.products };
+    case "FETCH_PRODUCTS_FAILURE":
+      return { ...state, status: "failed", error: action.error };
     case "ADD_PRODUCT":
-      const newProductsAfterAdd = [...state.products, action.product];
-      console.log("action.product", action.product);
-      localStorage.setItem("products", JSON.stringify(newProductsAfterAdd));
-      return { ...state, products: newProductsAfterAdd };
-    case "UPDATE_PRODUCT":
-      const existingProduct = state.products.find(
-        (product) => product.id === action.product.id
+      const newProducts = [...state.products, action.product];
+      syncWithLocalStorage(newProducts);
+      return { ...state, products: newProducts };
+    case "UPDATE_PRODUCT": {
+      const productIndex = state.products.findIndex(
+        (product) => product.id === action.updatedProduct.id
       );
+      if (productIndex !== -1) {
+        const oldProduct = state.products[productIndex];
+        const detectedChanges = detectChanges(
+          oldProduct,
+          action.updatedProduct
+        );
 
-      if (!existingProduct) {
-        return state; // Product not found, no action needed
+        const updatedProduct: Product = {
+          ...action.updatedProduct,
+          inventoryChanges: [
+            ...(oldProduct.inventoryChanges || []),
+            ...detectedChanges,
+          ],
+        };
+
+        const updatedProducts = state.products.map((product, index) =>
+          index === productIndex ? updatedProduct : product
+        );
+
+        syncWithLocalStorage(updatedProducts);
+        return { ...state, products: updatedProducts };
       }
-
-      // Get descriptions for changes
-      const changes = getChanges(existingProduct, action.product);
-
-      // Create change entries
-      const changeEntries: InventoryChange[] = changes.map((change) => ({
-        date: new Date().toISOString(),
-        changeType: "edit",
-        changedBy: "Admin", // Replace with dynamic user data if available
-        description: change,
-        newQuantity: action.product.stock,
-      }));
-
-      // Update product with new changes
-      const updatedProduct: Product = {
-        ...action.product,
-        inventoryChanges: [
-          ...(action.product.inventoryChanges || []),
-          ...changeEntries,
-        ],
-      };
-
-      const newProductsAfterUpdate = state.products.map((product) =>
-        product.id === action.product.id ? updatedProduct : product
-      );
-
-      localStorage.setItem("products", JSON.stringify(newProductsAfterUpdate));
-      return { ...state, products: newProductsAfterUpdate };
+      return state;
+    }
     case "DELETE_PRODUCT":
-      const newProductsAfterDelete = state.products.filter(
-        (product) => product.id !== action.id
+      const filteredProducts = state.products.filter(
+        (product) => product.id !== action.productId
       );
-      localStorage.setItem("products", JSON.stringify(newProductsAfterDelete));
-      return { ...state, products: newProductsAfterDelete };
-    case "LOG_INVENTORY_CHANGE":
-      const updatedProductsAfterLog = state.products.map((product) =>
-        product.id === action.productId
-          ? {
-              ...product,
-              inventoryChanges: [
-                ...(product.inventoryChanges || []),
-                action.change,
-              ],
-              stock: action.change.newQuantity,
-            }
-          : product
+      syncWithLocalStorage(filteredProducts);
+      return { ...state, products: filteredProducts };
+    case "LOG_INVENTORY_CHANGE": {
+      const prodIndex = state.products.findIndex(
+        (product) => product.id === action.productId
       );
-      localStorage.setItem("products", JSON.stringify(updatedProductsAfterLog));
-      return { ...state, products: updatedProductsAfterLog };
+      if (prodIndex !== -1) {
+        const product = state.products[prodIndex];
+        const updatedProduct: Product = {
+          ...product,
+          inventoryChanges: [
+            ...(product.inventoryChanges || []),
+            action.change,
+          ],
+          stock: action.change.newQuantity,
+        };
+        const newProductList = state.products.map((p, index) =>
+          index === prodIndex ? { ...updatedProduct } : p
+        );
+        syncWithLocalStorage(newProductList);
+        return { ...state, products: newProductList };
+      }
+      return state;
+    }
     default:
       return state;
   }
 };
 
-// Context Creation
 const ProductContext = createContext<{
   state: ProductState;
-  dispatch: React.Dispatch<ProductAction>;
-}>({ state: initialState, dispatch: () => null });
+  dispatch: React.Dispatch<Action>;
+}>({
+  state: initialState,
+  dispatch: () => null,
+});
 
-// Provider Component
-export const ProductProvider: React.FC<{ children: ReactNode }> = ({
-  children,
-}) => {
+export const ProductProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(productReducer, initialState);
 
   useEffect(() => {
-    const localData = localStorage.getItem("products");
-    if (localData) {
-      dispatch({
-        type: "INITIALIZE_PRODUCTS",
-        products: JSON.parse(localData),
-      });
-    } else {
-      // If no data in localStorage, initialize with mock data
-      localStorage.setItem("products", JSON.stringify(mockProducts));
-      dispatch({ type: "INITIALIZE_PRODUCTS", products: mockProducts });
-    }
+    const productsFromLocalStorage = loadFromLocalStorage();
+    dispatch({
+      type: "FETCH_PRODUCTS_SUCCESS",
+      products: productsFromLocalStorage,
+    });
   }, []);
 
   return (
@@ -143,11 +159,4 @@ export const ProductProvider: React.FC<{ children: ReactNode }> = ({
   );
 };
 
-// Custom Hook for Convenience
-export const useProductContext = () => {
-  const context = useContext(ProductContext);
-  if (!context) {
-    throw new Error("useProductContext must be used within a ProductProvider");
-  }
-  return context;
-};
+export const useProductContext = () => useContext(ProductContext);

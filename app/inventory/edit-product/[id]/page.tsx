@@ -2,7 +2,7 @@
 
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   Box,
   Button,
@@ -19,9 +19,8 @@ import { useFormik } from "formik";
 import * as yup from "yup";
 import { useRouter, useParams } from "next/navigation";
 import { Product } from "../../../../src/types/product";
-import { useProductContext } from "../../../../src/contexts/ProductContext";
-import ImageUploader from "../../../../src/components/product/ImageUploader";
-import productService from "../../../../src/services/productService";
+import ImageUploader from "../../../../src/components/common/ImageUploader";
+import { useProductContext } from "../../../../src/contexts/ProductContext"; // Import context hook
 
 // Styled components (same as add page)
 const PageContainer = styled(Box)(({ theme }) => ({
@@ -65,10 +64,8 @@ const StyledSelect = styled(Select)(({ theme }) => ({
 }));
 
 const SaveButton = styled(Button)(({ theme }) => ({
-  width: "100%",
   backgroundColor: "#39DB7D",
   color: "#ffffff",
-  marginTop: theme.spacing(3),
   "&:hover": {
     backgroundColor: "#32C46A",
   },
@@ -97,23 +94,11 @@ const validationSchema = yup.object({
 });
 
 const EditProductPage: React.FC = () => {
-  const { dispatch } = useProductContext();
+  const { state, dispatch } = useProductContext();
   const router = useRouter();
   const { id } = useParams();
-  const [product, setProduct] = useState<Product | null>(null);
 
-  useEffect(() => {
-    if (id) {
-      productService.getProductById(id).then((fetchedProduct) => {
-        console.log('fetchedProduct', fetchedProduct);
-        if (fetchedProduct) {
-          setProduct(fetchedProduct);
-        } else {
-          router.push("/inventory");
-        }
-      });
-    }
-  }, [id]);
+  const product = state.products.find((p) => p.id === id);
 
   const formik = useFormik({
     initialValues: {
@@ -132,18 +117,22 @@ const EditProductPage: React.FC = () => {
     enableReinitialize: true,
     onSubmit: (values) => {
       const updatedProduct: Product = {
-        ...product,
+        id: product?.id,
+        status: product?.status,
+        inventoryChanges: product?.inventoryChanges,
         ...values,
       };
 
-      dispatch({
-        type: "UPDATE_PRODUCT",
-        product: updatedProduct,
-      });
+      console.log("updatedProduct", updatedProduct);
+      dispatch({ type: "UPDATE_PRODUCT", updatedProduct });
 
       router.push("/inventory");
     },
   });
+
+  const handleBackClick = () => {
+    router.push("/inventory");
+  };
 
   if (!product) {
     return <Typography>Loading...</Typography>;
@@ -302,9 +291,9 @@ const EditProductPage: React.FC = () => {
               label="Location"
               error={formik.touched.location && Boolean(formik.errors.location)}
             >
-              <MenuItem value="Wharehouse * BDG">Wharehouse * BDG</MenuItem>
-              <MenuItem value="Wharehouse * JKT">Wharehouse * JKT</MenuItem>
-              <MenuItem value="Wharehouse * MLG">Wharehouse * MLG</MenuItem>
+              <MenuItem value="Warehouse • BDG">Warehouse • BDG</MenuItem>
+              <MenuItem value="Warehouse • JKT">Warehouse • JKT</MenuItem>
+              <MenuItem value="Warehouse • MLG">Warehouse • MLG</MenuItem>
             </StyledSelect>
             {formik.touched.location && formik.errors.location && (
               <Typography color="error">{formik.errors.location}</Typography>
@@ -323,7 +312,21 @@ const EditProductPage: React.FC = () => {
           />
         </Stack>
 
-        <SaveButton type="submit">Save Changes</SaveButton>
+        <Stack
+          direction={{ sm: "column", md: "row" }}
+          spacing={2}
+          sx={{ marginTop: 3 }}
+          justifyContent="space-around"
+        >
+          <Button
+            variant="outlined"
+            onClick={handleBackClick}
+            sx={{ color: "white" }}
+          >
+            Back to Home
+          </Button>
+          <SaveButton type="submit">Save Changes</SaveButton>
+        </Stack>
       </form>
     </PageContainer>
   );

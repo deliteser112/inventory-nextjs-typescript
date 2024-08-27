@@ -1,75 +1,105 @@
-// src/components/product/ProductClientWrapper.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import ProductList from "./ProductList";
 import ProductListToolbar from "./ProductListToolbar";
-import ProductForm from "./ProductForm";
 import ProductDetailsSidebar from "./ProductDetailsSidebar";
-import InventoryManagement from "../inventory/InventoryManagement";
-import { useProductContext } from "../../contexts/ProductContext"; // Use context hook
-import productService from '../../services/productService';
-
-import { Product, InventoryChange } from "../../types/product";;
+import Sidebar from "../../components/layout/Sidebar";
+import { useProductContext } from "../../contexts/ProductContext";
+import { Product } from "../../types/product";
 
 const ProductClientWrapper: React.FC = () => {
+  const { state, dispatch } = useProductContext();
+  const { products } = state;
 
-  const { state, dispatch } = useProductContext(); // Access state and dispatch from context
-  const [openForm, setOpenForm] = useState<boolean>(false);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | undefined>(
     undefined
   );
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
-
-  console.log('state', state);
+  const [viewType, setViewType] = useState<"list" | "card">("list");
+  const [filters, setFilters] = useState({
+    productType: "",
+    sortBy: "A-Z",
+    stockAlert: "All stock",
+    category: "All stock",
+    minPrice: "",
+    maxPrice: "",
+  });
 
   useEffect(() => {
-    setFilteredProducts([...state.products]);
-  }, [state])
-
-  const handleAddProduct = () => {
-    setSelectedProduct(undefined);
-    setOpenForm(true);
-  };
-
-  const handleEditProduct = (product: Product) => {
-    setSelectedProduct(product);
-    setOpenForm(true);
-  };
-
-  const handleSaveProduct = (product: Product) => {
-    if (product.id) {
-      dispatch({ type: "UPDATE_PRODUCT", product });
-    } else {
-      const newProduct = { ...product, id: Date.now().toString() };
-      dispatch({ type: "ADD_PRODUCT", product: newProduct });
+    dispatch({ type: "FETCH_PRODUCTS_START" });
+    try {
+      const storedProducts = JSON.parse(
+        localStorage.getItem("products") || "[]"
+      );
+      dispatch({ type: "FETCH_PRODUCTS_SUCCESS", products: storedProducts });
+    } catch (error) {
+      dispatch({
+        type: "FETCH_PRODUCTS_FAILURE",
+        error: "Failed to fetch products",
+      });
     }
-    setOpenForm(false);
+  }, [dispatch]);
+
+  useEffect(() => {
+    applyFilters();
+  }, [filters, products]);
+
+  const applyFilters = () => {
+    let filtered = [...products];
+
+    if (filters.productType) {
+      filtered = filtered.filter(
+        (product) => product.productType === filters.productType
+      );
+    }
+
+    if (filters.category && filters.category !== "All stock") {
+      filtered = filtered.filter(
+        (product) => product.category === filters.category
+      );
+    }
+
+    if (filters.stockAlert === "Low stock") {
+      filtered = filtered.filter((product) => product.stock < 10);
+    }
+
+    if (filters.minPrice) {
+      filtered = filtered.filter(
+        (product) => product.retailPrice >= parseFloat(filters.minPrice)
+      );
+    }
+
+    if (filters.maxPrice) {
+      filtered = filtered.filter(
+        (product) => product.retailPrice <= parseFloat(filters.maxPrice)
+      );
+    }
+
+    if (filters.sortBy === "A-Z") {
+      filtered.sort((a, b) => a.name.localeCompare(b.name));
+    } else {
+      filtered.sort((a, b) => b.name.localeCompare(a.name));
+    }
+
+    setFilteredProducts(filtered);
   };
 
-  const handleDeleteProduct = (id: string) => {
-    dispatch({ type: "DELETE_PRODUCT", id });
+  const handleFilterChange = (newFilters: any) => {
+    setFilters(newFilters);
+  };
+
+  const handleDeleteProduct = (id?: string) => {
+    dispatch({ type: "DELETE_PRODUCT", productId: id });
     setSidebarOpen(false);
   };
 
   const handleSearch = (searchTerm: string) => {
-    const filtered = state.products.filter((product) =>
+    const filtered = products.filter((product) =>
       product.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredProducts(filtered);
-  };
-
-  const handleAdjustInventory = (productId: string, newStock: number) => {
-    const change: InventoryChange = {
-      date: new Date().toISOString(),
-      changeType: "adjustment",
-      quantityChanged:
-        newStock - (state.products.find((p) => p.id === productId)?.stock ?? 0),
-      newQuantity: newStock,
-      changedBy: "Admin",
-    };
-    dispatch({ type: "LOG_INVENTORY_CHANGE", productId, change });
   };
 
   const handleProductClick = (product: Product) => {
@@ -81,29 +111,28 @@ const ProductClientWrapper: React.FC = () => {
     setSidebarOpen(false);
   };
 
+  const handleToggleView = (type: "list" | "card") => {
+    setViewType(type);
+  };
+
   return (
     <div>
       <ProductListToolbar
         onSearch={handleSearch}
-        onAddProduct={handleAddProduct}
+        onToggleView={handleToggleView}
+      />
+      <Sidebar
+        open={sidebarOpen}
+        onClose={handleSidebarClose}
+        filters={filters}
+        onFilterChange={handleFilterChange}
       />
       <ProductList
         products={filteredProducts}
-        onEditProduct={handleEditProduct}
         onDeleteProduct={handleDeleteProduct}
         onProductClick={handleProductClick}
+        viewType={viewType}
       />
-      {/* <InventoryManagement
-        products={state.products}
-        onAdjustInventory={handleAdjustInventory}
-      /> */}
-      {openForm && (
-        <ProductForm
-          product={selectedProduct}
-          onSave={handleSaveProduct}
-          onClose={() => setOpenForm(false)}
-        />
-      )}
       {selectedProduct && (
         <ProductDetailsSidebar
           product={selectedProduct}

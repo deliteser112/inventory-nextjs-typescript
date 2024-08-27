@@ -4,9 +4,9 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import theme from "../src/styles/theme"; // Import your custom theme
+import theme from "../src/styles/theme";
 import "./globals.css";
-import { ProductProvider } from "../src/contexts/ProductContext"; // Import ProductProvider
+import { ProductProvider } from "../src/contexts/ProductContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,10 +23,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        {/* Wrap your application with ProductProvider to provide the context */}
         <ProductProvider>
           <ThemeProvider theme={theme}>
-            <CssBaseline /> {/* Apply the theme's baseline styles */}
+            <CssBaseline />
             {children}
           </ThemeProvider>
         </ProductProvider>

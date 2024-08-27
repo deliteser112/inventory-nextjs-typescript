@@ -1,17 +1,23 @@
-"use client"
+// Topbar.tsx
 
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import {
   AppBar,
   Toolbar,
   IconButton,
   Typography,
-  InputBase,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import AccountCircle from "@mui/icons-material/AccountCircle";
+import MenuIcon from "@mui/icons-material/Menu";
 
-const Topbar: React.FC = () => {
+interface TopbarProps {
+  onMenuClick: () => void; // Prop to handle menu click
+}
+
+const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
   return (
     <AppBar
       position="fixed"
@@ -21,6 +27,16 @@ const Topbar: React.FC = () => {
       }}
     >
       <Toolbar>
+        {/* Menu button for mobile view */}
+        <IconButton
+          color="inherit"
+          edge="start"
+          sx={{ mr: 2, display: { xs: 'block', sm: 'none' } }}
+          onClick={onMenuClick}
+        >
+          <MenuIcon />
+        </IconButton>
+        
         <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>
           Inventory Management
         </Typography>
