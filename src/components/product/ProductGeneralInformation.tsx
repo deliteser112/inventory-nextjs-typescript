@@ -1,9 +1,9 @@
+// src/components/product/ProductGeneralInformation.tsx
 import React, { useState } from "react";
 import { Box, Typography, Button, Divider, Grid } from "@mui/material";
 import { Product, InventoryChange } from "../../types/product";
 import StockAdjustmentSidebar from "../inventory/StockAdjustmentSidebar";
-import { useAppDispatch } from "../../store"; // Import the typed useDispatch
-import { logInventoryChangeAsync } from "../../store/slices/productSlice"; // Import the async thunk action
+import { useProductContext } from "../../contexts/ProductContext"; // Import the context hook
 
 interface ProductGeneralInformationProps {
   product: Product;
@@ -13,34 +13,27 @@ const ProductGeneralInformation: React.FC<ProductGeneralInformationProps> = ({
   product,
 }) => {
   const [adjustmentSidebarOpen, setAdjustmentSidebarOpen] = useState(false);
-  const dispatch = useAppDispatch(); // Use the typed dispatch
+  const { dispatch } = useProductContext();
 
-  // Function to open the StockAdjustmentSidebar
   const handleAdjustmentOpen = () => {
     setAdjustmentSidebarOpen(true);
   };
 
-  // Function to close the StockAdjustmentSidebar
   const handleAdjustmentClose = () => {
     setAdjustmentSidebarOpen(false);
   };
 
-  // Function to handle saving an inventory adjustment
   const handleSaveAdjustment = (productId: string, change: InventoryChange) => {
-    // Dispatch a Redux action to log the inventory change
-    dispatch(logInventoryChangeAsync({ productId, change }));
+    dispatch({ type: "LOG_INVENTORY_CHANGE", productId, change });
 
     setAdjustmentSidebarOpen(false);
   };
 
   return (
     <Box>
-      {/* Divider for styling */}
       <Divider sx={{ backgroundColor: "#2C2C2E", marginBottom: "16px" }} />
 
-      {/* Product Images and Stock Information */}
       <Grid container spacing={2}>
-        {/* Product Image Section */}
         <Grid item xs={12} sm={6}>
           <Box
             component="img"
@@ -51,7 +44,7 @@ const ProductGeneralInformation: React.FC<ProductGeneralInformationProps> = ({
               marginBottom: "16px",
             }}
             alt={product.name}
-            src={product.image || "/images/mock-product.png"} // Use a default image if none exists
+            src={product.image || "/images/mock-product.png"}
           />
         </Grid>
 
@@ -70,7 +63,7 @@ const ProductGeneralInformation: React.FC<ProductGeneralInformationProps> = ({
             variant="contained"
             color="primary"
             sx={{ marginBottom: "16px" }}
-            onClick={handleAdjustmentOpen} // Open the sidebar on click
+            onClick={handleAdjustmentOpen}
           >
             Adjust Stock
           </Button>

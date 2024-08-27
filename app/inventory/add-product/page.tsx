@@ -15,13 +15,10 @@ import {
 import { styled } from "@mui/material/styles";
 import { useFormik } from "formik";
 import * as yup from "yup";
-
-import { useDispatch } from "react-redux";
-import { addProductAsync } from "../../../src/store/slices/productSlice";
-import { AppDispatch } from "../../../src/store";
-
+import { useRouter } from "next/navigation"; // Import useRouter from Next.js
 import { Product } from "../../../src/types/product";
-import ImageUploader from "../../../src/components/product/ImageUploader";
+import ImageUploader from "../../../src/components/common/ImageUploader";
+import { useProductContext } from "../../../src/contexts/ProductContext"; // Import context hook
 
 // Styled components
 const PageContainer = styled(Box)(({ theme }) => ({
@@ -65,10 +62,8 @@ const StyledSelect = styled(Select)(({ theme }) => ({
 }));
 
 const SaveButton = styled(Button)(({ theme }) => ({
-  width: "100%",
   backgroundColor: "#39DB7D",
   color: "#ffffff",
-  marginTop: theme.spacing(3),
   "&:hover": {
     backgroundColor: "#32C46A",
   },
@@ -97,7 +92,8 @@ const validationSchema = yup.object({
 });
 
 const AddProductPage: React.FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
+  const { dispatch } = useProductContext();
+  const router = useRouter();
 
   const formik = useFormik({
     initialValues: {
@@ -109,7 +105,7 @@ const AddProductPage: React.FC = () => {
       retailPrice: 0,
       wholesalePrice: 0,
       stock: 0,
-      image: "",
+      image: "/images/mock-product.png",
       location: "",
     },
     validationSchema: validationSchema,
@@ -119,17 +115,20 @@ const AddProductPage: React.FC = () => {
         id: String(Date.now()),
         status: "active",
         inventoryChanges: [],
-        price: 0
+        price: 0,
       };
 
-      // dispatch({
-      //   type: "ADD_PRODUCT",
-      //   product,
-      // });
-      dispatch(addProductAsync(product));
+      // Dispatch context action to add product
+      dispatch({ type: "ADD_PRODUCT", product });
+
       formik.resetForm();
+      router.push("/inventory");
     },
   });
+
+  const handleBackClick = () => {
+    router.push("/inventory");
+  };
 
   return (
     <PageContainer maxWidth="md" margin="auto">
@@ -284,9 +283,9 @@ const AddProductPage: React.FC = () => {
               label="Location"
               error={formik.touched.location && Boolean(formik.errors.location)}
             >
-              <MenuItem value="Wharehouse * BDG">Wharehouse * BDG</MenuItem>
-              <MenuItem value="Wharehouse * JKT">Wharehouse * JKT</MenuItem>
-              <MenuItem value="Wharehouse * MLG">Wharehouse * MLG</MenuItem>
+              <MenuItem value="Warehouse • BDG">Warehouse • BDG</MenuItem>
+              <MenuItem value="Warehouse • JKT">Warehouse • JKT</MenuItem>
+              <MenuItem value="Warehouse • MLG">Warehouse • MLG</MenuItem>
             </StyledSelect>
             {formik.touched.location && formik.errors.location && (
               <Typography color="error">{formik.errors.location}</Typography>
@@ -304,7 +303,21 @@ const AddProductPage: React.FC = () => {
             helperText={formik.touched.stock && formik.errors.stock}
           />
         </Stack>
-        <SaveButton type="submit">Save Product</SaveButton>
+        <Stack
+          direction={{ sm: "column", md: "row" }}
+          spacing={2}
+          sx={{ marginTop: 3 }}
+          justifyContent="space-around"
+        >
+          <Button
+            variant="outlined"
+            onClick={handleBackClick}
+            sx={{ color: "white" }}
+          >
+            Back to Home
+          </Button>
+          <SaveButton type="submit">Save Product</SaveButton>
+        </Stack>
       </form>
     </PageContainer>
   );

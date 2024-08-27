@@ -1,7 +1,11 @@
+// ProductListToolbar.tsx
+
 import React, { useState } from "react";
 import Link from "next/link";
+import { useTheme } from "@mui/material/styles";
 import {
   Box,
+  Stack,
   Button,
   IconButton,
   TextField,
@@ -9,25 +13,28 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
-import ScannerIcon from "@mui/icons-material/QrCodeScanner";
 import ViewListIcon from "@mui/icons-material/ViewList";
 import ViewModuleIcon from "@mui/icons-material/ViewModule";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
 
 interface ProductListToolbarProps {
   onSearch: (searchTerm: string) => void;
-  onAddProduct: () => void;
+  onToggleView: (viewType: "list" | "card") => void;
 }
 
 const ProductListToolbar: React.FC<ProductListToolbarProps> = ({
   onSearch,
-  onAddProduct,
+  onToggleView,
 }) => {
+  const theme = useTheme();
   const [searchTerm, setSearchTerm] = useState("");
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
     onSearch(event.target.value);
+  };
+
+  const handleViewToggle = (type: "list" | "card") => {
+    onToggleView(type);
   };
 
   return (
@@ -40,6 +47,9 @@ const ProductListToolbar: React.FC<ProductListToolbarProps> = ({
         padding: "8px 16px",
         borderRadius: "12px",
         boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.2)",
+        [theme.breakpoints.down("md")]: {
+          display: "block",
+        },
       }}
     >
       <TextField
@@ -50,6 +60,10 @@ const ProductListToolbar: React.FC<ProductListToolbarProps> = ({
           backgroundColor: "#2C2C2E",
           borderRadius: "8px",
           input: { color: "#FFFFFF" },
+          [theme.breakpoints.down("md")]: {
+            width: "100%",
+            marginBottom: 2,
+          },
         }}
         InputProps={{
           startAdornment: (
@@ -61,54 +75,48 @@ const ProductListToolbar: React.FC<ProductListToolbarProps> = ({
         value={searchTerm}
         onChange={handleSearchChange}
       />
-      {/* <IconButton sx={{ color: '#39DB7D', marginLeft: '16px', backgroundColor: '#2C2C2E', padding: '8px' }}>
-        <ScannerIcon />
-      </IconButton> */}
-      <IconButton
-        sx={{
-          color: "#39DB7D",
-          marginLeft: "8px",
-          backgroundColor: "#2C2C2E",
-          padding: "8px",
-        }}
-      >
-        <ViewListIcon />
-      </IconButton>
-      <IconButton
-        sx={{
-          color: "#39DB7D",
-          marginLeft: "8px",
-          backgroundColor: "#2C2C2E",
-          padding: "8px",
-        }}
-      >
-        <ViewModuleIcon />
-      </IconButton>
-      <IconButton
-        sx={{
-          color: "#39DB7D",
-          marginLeft: "8px",
-          backgroundColor: "#2C2C2E",
-          padding: "8px",
-        }}
-      >
-        <MoreVertIcon />
-      </IconButton>
-      <Link href="/inventory/add-product" passHref>
-        <Button
-          variant="contained"
-          sx={{
-            backgroundColor: "#39DB7D",
-            color: "#000000",
-            marginLeft: "16px",
-            padding: "8px 24px",
-            borderRadius: "8px",
-          }}
-          startIcon={<AddIcon />}
-        >
-          Add Product
-        </Button>
-      </Link>
+      <Stack direction="row" justifyContent="space-between">
+        <Box>
+          <IconButton
+            sx={{
+              color: "#39DB7D",
+              marginLeft: "8px",
+              backgroundColor: "#2C2C2E",
+              padding: "8px",
+            }}
+            onClick={() => handleViewToggle("list")}
+          >
+            <ViewListIcon />
+          </IconButton>
+          <IconButton
+            sx={{
+              color: "#39DB7D",
+              marginLeft: "8px",
+              backgroundColor: "#2C2C2E",
+              padding: "8px",
+            }}
+            onClick={() => handleViewToggle("card")}
+          >
+            <ViewModuleIcon />
+          </IconButton>
+        </Box>
+
+        <Link href="/inventory/add-product" passHref>
+          <Button
+            variant="contained"
+            sx={{
+              backgroundColor: "#39DB7D",
+              color: "#000000",
+              marginLeft: "16px",
+              padding: "8px 24px",
+              borderRadius: "8px",
+            }}
+            startIcon={<AddIcon />}
+          >
+            Add Product
+          </Button>
+        </Link>
+      </Stack>
     </Box>
   );
 };

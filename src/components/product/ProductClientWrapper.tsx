@@ -1,63 +1,97 @@
-// src/components/product/ProductClientWrapper.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import ProductList from "./ProductList";
 import ProductListToolbar from "./ProductListToolbar";
-import ProductForm from "./ProductForm";
 import ProductDetailsSidebar from "./ProductDetailsSidebar";
-import { useDispatch, useSelector } from "react-redux"; // Import useSelector and useDispatch from react-redux
-import { RootState, AppDispatch } from "../../store"; // Import RootState and AppDispatch types
-import {
-  fetchProducts,
-  addProductAsync,
-  updateProductAsync,
-  deleteProductAsync,
-} from "../../store/slices/productSlice"; // Import async thunks
-
+import Sidebar from "../../components/layout/Sidebar";
+import { useProductContext } from "../../contexts/ProductContext";
 import { Product } from "../../types/product";
 
 const ProductClientWrapper: React.FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const { products } = useSelector((state: RootState) => state.product); // Use useSelector to access products from Redux store
+  const { state, dispatch } = useProductContext();
+  const { products } = state;
 
-  const [openForm, setOpenForm] = useState<boolean>(false);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | undefined>(
     undefined
   );
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
+  const [viewType, setViewType] = useState<"list" | "card">("list");
+  const [filters, setFilters] = useState({
+    productType: "",
+    sortBy: "A-Z",
+    stockAlert: "All stock",
+    category: "All stock",
+    minPrice: "",
+    maxPrice: "",
+  });
 
   useEffect(() => {
-    dispatch(fetchProducts()); // Fetch products on component mount
+    dispatch({ type: "FETCH_PRODUCTS_START" });
+    try {
+      const storedProducts = JSON.parse(
+        localStorage.getItem("products") || "[]"
+      );
+      dispatch({ type: "FETCH_PRODUCTS_SUCCESS", products: storedProducts });
+    } catch (error) {
+      dispatch({
+        type: "FETCH_PRODUCTS_FAILURE",
+        error: "Failed to fetch products",
+      });
+    }
   }, [dispatch]);
 
   useEffect(() => {
-    setFilteredProducts(products); // Update filtered products whenever products change
-  }, [products]);
+    applyFilters();
+  }, [filters, products]);
 
-  const handleAddProduct = () => {
-    setSelectedProduct(undefined);
-    setOpenForm(true);
-  };
+  const applyFilters = () => {
+    let filtered = [...products];
 
-  const handleEditProduct = (product: Product) => {
-    setSelectedProduct(product);
-    setOpenForm(true);
-  };
-
-  const handleSaveProduct = (product: Product) => {
-    if (product.id) {
-      dispatch(updateProductAsync(product)); // Dispatch async thunk for updating product
-    } else {
-      const newProduct = { ...product, id: Date.now().toString() };
-      dispatch(addProductAsync(newProduct)); // Dispatch async thunk for adding new product
+    if (filters.productType) {
+      filtered = filtered.filter(
+        (product) => product.productType === filters.productType
+      );
     }
-    setOpenForm(false);
+
+    if (filters.category && filters.category !== "All stock") {
+      filtered = filtered.filter(
+        (product) => product.category === filters.category
+      );
+    }
+
+    if (filters.stockAlert === "Low stock") {
+      filtered = filtered.filter((product) => product.stock < 10);
+    }
+
+    if (filters.minPrice) {
+      filtered = filtered.filter(
+        (product) => product.retailPrice >= parseFloat(filters.minPrice)
+      );
+    }
+
+    if (filters.maxPrice) {
+      filtered = filtered.filter(
+        (product) => product.retailPrice <= parseFloat(filters.maxPrice)
+      );
+    }
+
+    if (filters.sortBy === "A-Z") {
+      filtered.sort((a, b) => a.name.localeCompare(b.name));
+    } else {
+      filtered.sort((a, b) => b.name.localeCompare(a.name));
+    }
+
+    setFilteredProducts(filtered);
   };
 
-  const handleDeleteProduct = (id: string) => {
-    dispatch(deleteProductAsync(id)); // Dispatch async thunk for deleting product
+  const handleFilterChange = (newFilters: any) => {
+    setFilters(newFilters);
+  };
+
+  const handleDeleteProduct = (id?: string) => {
+    dispatch({ type: "DELETE_PRODUCT", productId: id });
     setSidebarOpen(false);
   };
 
@@ -77,25 +111,28 @@ const ProductClientWrapper: React.FC = () => {
     setSidebarOpen(false);
   };
 
+  const handleToggleView = (type: "list" | "card") => {
+    setViewType(type);
+  };
+
   return (
     <div>
       <ProductListToolbar
         onSearch={handleSearch}
-        onAddProduct={handleAddProduct}
+        onToggleView={handleToggleView}
+      />
+      <Sidebar
+        open={sidebarOpen}
+        onClose={handleSidebarClose}
+        filters={filters}
+        onFilterChange={handleFilterChange}
       />
       <ProductList
         products={filteredProducts}
-        onEditProduct={handleEditProduct}
         onDeleteProduct={handleDeleteProduct}
         onProductClick={handleProductClick}
+        viewType={viewType}
       />
-      {openForm && (
-        <ProductForm
-          product={selectedProduct}
-          onSave={handleSaveProduct}
-          onClose={() => setOpenForm(false)}
-        />
-      )}
       {selectedProduct && (
         <ProductDetailsSidebar
           product={selectedProduct}

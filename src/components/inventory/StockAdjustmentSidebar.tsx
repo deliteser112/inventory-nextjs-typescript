@@ -1,4 +1,4 @@
-// src/components/inventory/StockAdjustmentSidebar.tsx
+"use client";
 
 import React, { useState } from "react";
 import {
@@ -10,11 +10,6 @@ import {
   Button,
   MenuItem,
   Divider,
-  FormControl,
-  FormLabel,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { Product, InventoryChange } from "../../types/product";
@@ -32,9 +27,6 @@ const StockAdjustmentSidebar: React.FC<StockAdjustmentSidebarProps> = ({
   onClose,
   onSave,
 }) => {
-  const [adjustmentType, setAdjustmentType] = useState<"quantity" | "value">(
-    "quantity"
-  );
   const [location, setLocation] = useState("Warehouse • BDG");
   const [date, setDate] = useState<string>(
     new Date().toISOString().split("T")[0]
@@ -47,18 +39,23 @@ const StockAdjustmentSidebar: React.FC<StockAdjustmentSidebarProps> = ({
   const [description, setDescription] = useState<string>("");
 
   const handleSave = () => {
-    const change: InventoryChange = {
-      date: new Date().toISOString(),
-      changeType:
-        adjustmentType === "quantity" ? "adjustment" : "value adjustment",
-      quantityChanged: newQuantity - quantityAvailable,
-      newQuantity: newQuantity,
-      changedBy: "Admin",
-      location,
-      description
-    };
+    const quantityChanged = newQuantity - quantityAvailable;
 
-    onSave(product.id, change);
+    // Only create a change entry if there is a change in quantity
+    if (product.id && quantityChanged !== 0) {
+      const change: InventoryChange = {
+        date: new Date().toISOString(),
+        changeType: "adjustment",
+        quantityChanged,
+        newQuantity: newQuantity,
+        changedBy: "Admin",
+        location,
+        description: description || reason,
+      };
+
+      onSave(product.id, change);
+    }
+
     onClose();
   };
 

@@ -2,7 +2,11 @@
 
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import RootLayoutClient from "./RootLayoutClient"; // Import the client component
+import { ThemeProvider } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import theme from "../src/styles/theme";
+import "./globals.css";
+import { ProductProvider } from "../src/contexts/ProductContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,8 +23,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        {/* Pass children directly to the client component */}
-        <RootLayoutClient>{children}</RootLayoutClient>
+        <ProductProvider>
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            {children}
+          </ThemeProvider>
+        </ProductProvider>
       </body>
     </html>
   );

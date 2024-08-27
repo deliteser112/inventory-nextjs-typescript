@@ -6,18 +6,18 @@ const theme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: '#39DB7D',  // Green
+      main: '#39DB7D',
     },
     secondary: {
-      main: '#2E414D',  // Dark 05
+      main: '#2E414D',
     },
     background: {
-      default: '#0F171A',  // Black
-      paper: '#141E22',    // Dark 04 (variant)
+      default: '#0F171A',
+      paper: '#141E22',
     },
     text: {
       primary: '#ffffff',
-      secondary: '#B0BEC5',  // Light grey text
+      secondary: '#B0BEC5',
     },
   },
   typography: {
@@ -30,31 +30,31 @@ const theme = createTheme({
     h1: {
       fontSize: '2.5rem',
       fontWeight: 700,
-      color: '#39DB7D',  // Green
+      color: '#39DB7D',
     },
     h2: {
       fontSize: '2rem',
       fontWeight: 600,
-      color: '#39DB7D',  // Green
+      color: '#39DB7D',
     },
     body1: {
       fontSize: '1rem',
       fontWeight: 400,
-      color: '#ffffff',  // White text
+      color: '#ffffff',
     },
   },
   shape: {
-    borderRadius: 8,  // Rounded corners
+    borderRadius: 8,
   },
   components: {
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: '50px',  // Rounded pill shape
+          borderRadius: '50px',
           padding: '8px 24px',
-          backgroundColor: '#39DB7D',  // Green button background
+          backgroundColor: '#39DB7D',
           '&:hover': {
-            backgroundColor: '#2E414D',  // Dark 05 on hover
+            backgroundColor: '#2E414D',
           },
         },
       },
@@ -62,8 +62,8 @@ const theme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          backgroundColor: '#1A262D',  // Dark 03
-          color: '#ffffff',  // White text
+          backgroundColor: '#1A262D',
+          color: '#ffffff',
           padding: '16px',
           borderRadius: '12px',
           boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.2)',
@@ -73,14 +73,14 @@ const theme = createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: {
-          backgroundColor: '#141E22',  // Dark 04 (variant)
+          backgroundColor: '#141E22',
         },
       },
     },
     MuiDrawer: {
       styleOverrides: {
         paper: {
-          backgroundColor: '#283943',  // Dark 04
+          backgroundColor: '#283943',
           color: '#ffffff',
         },
       },

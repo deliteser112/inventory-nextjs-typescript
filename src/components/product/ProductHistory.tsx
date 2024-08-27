@@ -9,7 +9,6 @@ import {
   TimelineDot,
 } from "@mui/lab";
 import { Product, InventoryChange } from "../../types/product";
-import { styled } from "@mui/material/styles";
 
 // Define a type for the change history
 type ProductChange = InventoryChange & {
@@ -74,7 +73,7 @@ const ProductHistory: React.FC<{ product: Product }> = ({ product }) => {
                   }}
                 >
                   <Avatar
-                    src="/path/to/user.jpg" // Replace with actual avatar path or user data
+                    src="/images/user.jpg"
                     alt={change.changedBy}
                     sx={{ width: 40, height: 40, marginRight: "16px" }}
                   />

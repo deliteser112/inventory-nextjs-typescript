@@ -2,7 +2,7 @@
 
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   Box,
   Button,
@@ -17,13 +17,10 @@ import {
 import { styled } from "@mui/material/styles";
 import { useFormik } from "formik";
 import * as yup from "yup";
-import { useDispatch, useSelector } from "react-redux";
 import { useRouter, useParams } from "next/navigation";
 import { Product } from "../../../../src/types/product";
-import ImageUploader from "../../../../src/components/product/ImageUploader";
-
-import { updateProductAsync } from "../../../../src/store/slices/productSlice";
-import { RootState, AppDispatch } from "../../../../src/store";
+import ImageUploader from "../../../../src/components/common/ImageUploader";
+import { useProductContext } from "../../../../src/contexts/ProductContext"; // Import context hook
 
 // Styled components (same as add page)
 const PageContainer = styled(Box)(({ theme }) => ({
@@ -67,10 +64,8 @@ const StyledSelect = styled(Select)(({ theme }) => ({
 }));
 
 const SaveButton = styled(Button)(({ theme }) => ({
-  width: "100%",
   backgroundColor: "#39DB7D",
   color: "#ffffff",
-  marginTop: theme.spacing(3),
   "&:hover": {
     backgroundColor: "#32C46A",
   },
@@ -99,14 +94,11 @@ const validationSchema = yup.object({
 });
 
 const EditProductPage: React.FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
+  const { state, dispatch } = useProductContext();
   const router = useRouter();
   const { id } = useParams();
-  // const [product, setProduct] = useState<Product | null>(null);
 
-  const product = useSelector((state: RootState) =>
-    state.product.products.find((p) => p.id === id)
-  );
+  const product = state.products.find((p) => p.id === id);
 
   const formik = useFormik({
     initialValues: {
@@ -131,12 +123,16 @@ const EditProductPage: React.FC = () => {
         ...values,
       };
 
-      console.log('updatedProduct', updatedProduct);
-      dispatch(updateProductAsync(updatedProduct));
+      console.log("updatedProduct", updatedProduct);
+      dispatch({ type: "UPDATE_PRODUCT", updatedProduct });
 
       router.push("/inventory");
     },
   });
+
+  const handleBackClick = () => {
+    router.push("/inventory");
+  };
 
   if (!product) {
     return <Typography>Loading...</Typography>;
@@ -316,7 +312,21 @@ const EditProductPage: React.FC = () => {
           />
         </Stack>
 
-        <SaveButton type="submit">Save Changes</SaveButton>
+        <Stack
+          direction={{ sm: "column", md: "row" }}
+          spacing={2}
+          sx={{ marginTop: 3 }}
+          justifyContent="space-around"
+        >
+          <Button
+            variant="outlined"
+            onClick={handleBackClick}
+            sx={{ color: "white" }}
+          >
+            Back to Home
+          </Button>
+          <SaveButton type="submit">Save Changes</SaveButton>
+        </Stack>
       </form>
     </PageContainer>
   );
