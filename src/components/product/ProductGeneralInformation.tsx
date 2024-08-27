@@ -1,4 +1,3 @@
-// src/components/product/ProductGeneralInformation.tsx
 import React, { useState } from "react";
 import { Box, Typography, Button, Divider, Grid } from "@mui/material";
 import { Product, InventoryChange } from "../../types/product";

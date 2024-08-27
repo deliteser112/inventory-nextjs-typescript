@@ -78,7 +78,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           border: "1px solid #39DB7D",
           cursor: "pointer",
         },
-        minWidth: 300,
+        minWidth: 360,
       }}
       onClick={handleCardClick}
     >

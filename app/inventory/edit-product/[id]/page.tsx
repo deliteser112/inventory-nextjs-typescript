@@ -1,5 +1,3 @@
-// app/inventory/edit-product/[id]/page.tsx
-
 "use client";
 
 import React from "react";
@@ -22,7 +20,6 @@ import { Product } from "../../../../src/types/product";
 import ImageUploader from "../../../../src/components/common/ImageUploader";
 import { useProductContext } from "../../../../src/contexts/ProductContext"; // Import context hook
 
-// Styled components (same as add page)
 const PageContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(3),
   backgroundColor: "#0F171A",
@@ -71,7 +68,6 @@ const SaveButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-// Validation schema (same as add page)
 const validationSchema = yup.object({
   name: yup.string().required("Product name is required"),
   productType: yup.string().required("Product type is required"),
@@ -275,7 +271,7 @@ const EditProductPage: React.FC = () => {
           />
         </Stack>
 
-        {/* Quantity & Reorder Section */}
+        {/* Quantity Section */}
         <SectionTitle variant="h6">Quantity</SectionTitle>
         <Stack direction={{ sm: "column", md: "row" }} spacing={2}>
           <FormControl

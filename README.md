@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Inventory Management System
 
-## Getting Started
+The Inventory Management System is a web application designed to help businesses manage their inventory effectively. It allows users to add, edit, delete, and track products, adjust stock levels, and view a comprehensive history of inventory changes.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Add, Edit, Delete Products**: Easily manage your product list with CRUD operations.
+- **Stock Adjustment**: Adjust product stock levels with detailed logging of changes.
+- **Product Filtering and Sorting**: Filter products by type, category, stock levels, and more.
+- **Inventory History**: Track changes over time with a detailed history log.
+- **Responsive Design**: Optimized for both desktop and mobile devices.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Technologies Used
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Frontend**: React, Next.js, Material-UI
+- **State Management**: Context API with React Hooks
+- **Backend**: Mock server with JSON data (can be replaced with any backend server)
+- **Local Storage**: For data persistence in the browser
+- **TypeScript**: For type-safe JavaScript development
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## Installation
 
-## Learn More
+Follow these steps to set up and run the project locally:
 
-To learn more about Next.js, take a look at the following resources:
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/deliteser112/inventory-nextjs-typescript.git
+   cd inventory-nextjs-typescript
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. **Install Dependencies**: Use `npm` to install the project dependencies.
+   ```bash
+   npm install
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+3. **Run the Development Server**: Start the application in development mode.
+   ```bash
+   npm run dev
+   ```
+   Open [http://localhost:3000](http://localhost:3000) in your browser to see the app.
 
-## Deploy on Vercel
+## Usage
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Add a New Product**: Click the 'Add Product' button in the toolbar, fill in the product details, and save.
+- **Edit or Delete a Product**: Use the 'Edit' or 'Delete' options in the product card menu.
+- **Adjust Stock Levels**: Click on a product to open the Stock Adjustment Sidebar, adjust the quantity, and save changes.
+- **View Product History**: Click on a product to view its detailed history of changes.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## Components Overview
+
+### Product Management Components
+- **ProductCard.tsx**: Displays product details in a card format with options to edit or delete.
+- **ProductList.tsx**: Lists all products in either a card or list view based on user selection.
+- **ProductListItem.tsx**: Represents a product in list view.
+- **ProductForm.tsx**: Form for adding or editing product details.
+- **ImageUploader.tsx**: Component for uploading and previewing product images.
+- **ProductClientWrapper.tsx**: Wrapper component handling state and logic for product management.
+- **ProductHistory.tsx**: Displays the change history of a selected product.
+- **StockAdjustmentSidebar.tsx**: Sidebar for adjusting stock levels and adding inventory changes.
+
+### Layout Components
+- **Topbar.tsx**: Top navigation bar.
+- **Sidebar.tsx**: Sidebar with filtering and sorting options.
+
+### Context and State Management
+- **ProductContext.tsx**: Provides global state management for products using React Context API.

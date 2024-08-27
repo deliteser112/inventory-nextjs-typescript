@@ -15,10 +15,10 @@ import {
 import { styled } from "@mui/material/styles";
 import { useFormik } from "formik";
 import * as yup from "yup";
-import { useRouter } from "next/navigation"; // Import useRouter from Next.js
+import { useRouter } from "next/navigation";
 import { Product } from "../../../src/types/product";
 import ImageUploader from "../../../src/components/common/ImageUploader";
-import { useProductContext } from "../../../src/contexts/ProductContext"; // Import context hook
+import { useProductContext } from "../../../src/contexts/ProductContext";
 
 // Styled components
 const PageContainer = styled(Box)(({ theme }) => ({
@@ -118,7 +118,6 @@ const AddProductPage: React.FC = () => {
         price: 0,
       };
 
-      // Dispatch context action to add product
       dispatch({ type: "ADD_PRODUCT", product });
 
       formik.resetForm();
@@ -267,7 +266,7 @@ const AddProductPage: React.FC = () => {
           />
         </Stack>
 
-        {/* Quantity & Reorder Section */}
+        {/* Quantity Section */}
         <SectionTitle variant="h6">Quantity</SectionTitle>
         <Stack direction={{ sm: "column", md: "row" }} spacing={2}>
           <FormControl

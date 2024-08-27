@@ -10,7 +10,6 @@ import {
 } from "@mui/lab";
 import { Product, InventoryChange } from "../../types/product";
 
-// Define a type for the change history
 type ProductChange = InventoryChange & {
   changeType: string;
   description?: string;
