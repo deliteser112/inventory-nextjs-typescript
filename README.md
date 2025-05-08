@@ -2,6 +2,8 @@
 
 The Inventory Management System is a web application designed to help businesses manage their inventory effectively. It allows users to add, edit, delete, and track products, adjust stock levels, and view a comprehensive history of inventory changes.
 
+Go to Live 👉 https://inventory-nextjs-typescript.vercel.app/
+
 ## Features
 
 - **Add, Edit, Delete Products**: Easily manage your product list with CRUD operations.
