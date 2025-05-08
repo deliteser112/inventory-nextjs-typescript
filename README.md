@@ -18,6 +18,17 @@ The Inventory Management System is a web application designed to help businesses
 - **Local Storage**: For data persistence in the browser
 - **TypeScript**: For type-safe JavaScript development
 
+## Screenshots
+
+![image](https://github.com/user-attachments/assets/922072f0-773c-47a6-a477-bf99eca19454)
+
+![image](https://github.com/user-attachments/assets/d84f1935-4306-4329-ad2e-d10736eb5b77)
+
+![image](https://github.com/user-attachments/assets/95390618-9818-4e46-8ff8-ca8fdf903303)
+
+![image](https://github.com/user-attachments/assets/b90b8784-7096-4f83-9082-c2f64883cdb3)
+
+
 ## Installation
 
 Follow these steps to set up and run the project locally:
